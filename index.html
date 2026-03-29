@@ -1,53 +1,56 @@
 <html>
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="style.css" />
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
-    <script src="./component.js"></script>
-  </head>
+    <meta charset="utf-8" />
+    <title>AR 3D Model Viewer</title>
 
+    <!-- A-Frame core -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+    <!-- AR.js for A-Frame (markerless, location, or marker-based AR) -->
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+    <!-- A-Frame Extras (animations, loaders, etc.) -->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+
+    <style>
+      * { margin: 0; padding: 0; }
+      body { overflow: hidden; }
+    </style>
+  </head>
   <body>
-    
-   
-    <!-------------------------HOME: AR SCENE----------------------------------->
-    <!-- TARGET.MIND: Ganti URL target image di bawah ini dg URL target yg sudah Anda upload. Titik koma ; di akhir jangan dihapus---->
+
     <a-scene
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
       color-space="sRGB"
-      renderer="colorManagement: true, physicallyCorrectLights"
+      renderer="colorManagement: true; physicallyCorrectLights: true; logarithmicDepthBuffer: true;"
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
     >
-      <a-camera
-        position="0 0 0"
-        look-controls="enabled: false"
-        cursor="fuse: false; rayOrigin: mouse;"
-        raycaster="far: ${customFields.libVersion}; objects: .clickable"
-      ></a-camera>
 
+      <!-- Assets -->
       <a-assets>
-      
-
-        <!-- Model 3D --- Ganti URL objek yg ingin dikoleksi setelah src di bawah ini dengan URL file yang sudah Anda upload -->
-        <a-asset-item
-          id="model1"
-          src="dewaruci.glb"
-        ></a-asset-item>
-        <!-- Jika ingin menambah model 3D yg ingin dimunculkan,silakan copas asset item di atas dan ganti id menjadi model2 dst -->
-
-
+        <a-asset-item id="dewaruci-model" src="dewaruci.glb"></a-asset-item>
       </a-assets>
 
-      <!----------------- TARGET 1 ---------------------->
-      <a-entity>
+      <!-- AR Marker: default 'hiro' pattern. Print or show on screen:
+           https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png
+           Replace type/url if you have a custom marker. -->
+      <a-marker preset="hiro">
         <a-gltf-model
-          id="model1"
-          src="#model1"
+          src="#dewaruci-model"
           scale="0.05 0.05 0.05"
           rotation="0 -90 0"
+          position="0 0 0"
+          animation-mixer
         ></a-gltf-model>
-      
-      </a-entity>
+      </a-marker>
+
+      <!-- Camera -->
+      <a-entity camera></a-entity>
+
     </a-scene>
+
   </body>
 </html>

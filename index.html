@@ -10,76 +10,92 @@
 
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { overflow: hidden; background: transparent; }
+      body { overflow: hidden; }
 
-      #ar-overlay {
+      #camera-bg {
         position: fixed;
-        inset: 0;
-        z-index: -1;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 0;
       }
-
-      #ar-overlay video {
+      #camera-bg video {
         width: 100%;
         height: 100%;
         object-fit: cover;
+      }
+
+      a-scene {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 1;
+      }
+
+      /* Force the three.js canvas to be transparent */
+      canvas {
+        background: transparent !important;
       }
     </style>
   </head>
   <body>
 
-    <!-- Real camera feed behind the A-Frame scene -->
-    <div id="ar-overlay">
-      <video id="camera-feed" autoplay playsinline muted></video>
+    <!-- Layer 1: real camera -->
+    <div id="camera-bg">
+      <video id="cam" autoplay playsinline muted></video>
     </div>
 
+    <!-- Layer 2: A-Frame on top with transparent background -->
     <a-scene
-      background="color: transparent"
-      renderer="alpha: true; colorManagement: true; physicallyCorrectLights: true;"
+      embedded
       vr-mode-ui="enabled: false"
       device-orientation-permission-ui="enabled: false"
-      embedded
+      renderer="alpha: true; colorManagement: true; physicallyCorrectLights: true;"
     >
       <a-assets>
         <a-asset-item id="dewaruci-model" src="dewaruci.glb"></a-asset-item>
       </a-assets>
 
-      <!-- 3D model floating in front of the camera -->
       <a-gltf-model
         src="#dewaruci-model"
         scale="0.1 0.1 0.1"
-        rotation="0 00 0"
+        rotation="0 0 0"
         position="0 0 0"
-        
+        animation-mixer
       ></a-gltf-model>
 
-      <!-- Lighting -->
-      <a-light type="ambient" intensity="1.2"></a-light>
-      <a-light type="directional" position="1 2 1" intensity="1.5"></a-light>
+      <a-light type="ambient" color="#ffffff" intensity="1.5"></a-light>
+      <a-light type="directional" position="2 4 2" intensity="2"></a-light>
 
       <a-camera
         position="0 0 0"
         look-controls="enabled: true"
         wasd-controls="enabled: false"
       ></a-camera>
-
     </a-scene>
 
     <script>
-      // Start rear camera feed
-      async function startCamera() {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" },
-            audio: false
-          });
-          document.getElementById("camera-feed").srcObject = stream;
-        } catch (err) {
-          console.error("Camera error:", err);
-          alert("Could not access camera. Please allow camera permission and use HTTPS.");
+      // Force transparent background on the Three.js renderer
+      AFRAME.registerComponent('transparent-bg', {
+        init: function () {
+          const renderer = this.el.renderer;
+          renderer.setClearColor(0x000000, 0);
+          renderer.setPixelRatio(window.devicePixelRatio);
         }
-      }
+      });
 
-      startCamera();
+      document.querySelector('a-scene').setAttribute('transparent-bg', '');
+
+      // Start rear camera
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false
+      })
+      .then(stream => {
+        document.getElementById('cam').srcObject = stream;
+      })
+      .catch(err => {
+        alert('Camera error: ' + err.message + '\nMake sure you are on HTTPS.');
+      });
     </script>
 
   </body>
